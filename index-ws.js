@@ -49,3 +49,28 @@ wss.broadcast = function broadcast(data) {
   });
 };
 /** End Websocket **/
+
+/** Graceful Shutdown **/
+function shutdown() {
+  console.log('Shutting down...');
+
+  wss.clients.forEach(function each(client) {
+    client.close();
+  });
+
+  wss.close(function () {
+    server.close(function () {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+
+  setTimeout(function () {
+    console.error('Forcing shutdown');
+    process.exit(1);
+  }, 5000);
+}
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+/** End Graceful Shutdown **/
